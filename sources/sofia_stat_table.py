@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fontTools.otlLib.builder import buildStatTable
+from fontTools.otlLib.builder import buildStatTable, _addName
 from fontTools.ttLib import TTFont
+import sys
+
 
 UPRIGHT_AXES = [
     dict(
@@ -25,7 +27,7 @@ UPRIGHT_AXES = [
             dict(value=50, name="UltraCondensed"),
             dict(value=75, name="Condensed"),
             dict(value=87.5, name="SemiCondensed"),
-            dict(value=100, name="Normal", flags=0x2), # Regular
+            dict(value=100, name="Normal", flags=0x2), # Normal
         ],
     ),
     dict(
@@ -50,7 +52,8 @@ UPRIGHT_AXES = [
         tag="ital",
         name="Italic",
         ordering=2,
-        values=[dict(value=0, name="Roman", flags=0x2, linkedValue=1)],  # Regular
+        values=[
+            dict(value=0, name="Roman", flags=0x2, linkedValue=1)],  # Regular
     ),
 ]
 
@@ -63,7 +66,7 @@ ITALIC_AXES = [
             dict(value=50, name="UltraCondensed"),
             dict(value=75, name="Condensed"),
             dict(value=87.5, name="SemiCondensed"),
-            dict(value=100, name="Normal", flags=0x2), # Regular
+            dict(value=100, name="Normal", flags=0x2), # Normal
         ],
     ),
     dict(
@@ -97,11 +100,30 @@ SOF_UPRIGHT = f"{VARIABLE_DIR}/SofiaSans[wdth,wght].ttf"
 SOF_ITALIC = f"{VARIABLE_DIR}/SofiaSans-Italic[wdth,wght].ttf"
 
 
+def update_fvar(ttfont):
+    fvar = ttfont['fvar']
+    nametable = ttfont['name']
+    family_name = nametable.getName(16, 3, 1, 1033) or nametable.getName(1, 3, 1, 1033)
+    family_name = family_name.toUnicode()
+    font_style = "Italic" if "Italic" in ttfont.reader.file.name else "Roman"
+    ps_family_name = f"{family_name.replace(' ', '')}{font_style}"
+    nametable.setName(ps_family_name, 25, 3, 1, 1033)
+    for instance in fvar.instances:
+        instance_style = nametable.getName(instance.subfamilyNameID, 3, 1, 1033).toUnicode()
+        instance_style = instance_style.replace("Italic", "").strip()
+        if instance_style == "":
+            instance_style = "Regular"
+        ps_name = f"{ps_family_name}-{instance_style}"
+        instance.postscriptNameID = _addName(nametable, ps_name, 256)
+
+
+
 def main():
     # process upright files
     filepath = SOF_UPRIGHT
     tt = TTFont(filepath)
     buildStatTable(tt, UPRIGHT_AXES)
+    update_fvar(tt)
     tt.save(filepath)
     print(f"[STAT TABLE] Added STAT table to {filepath}")
 
@@ -109,6 +131,7 @@ def main():
     filepath = SOF_ITALIC
     tt = TTFont(filepath)
     buildStatTable(tt, ITALIC_AXES)
+    update_fvar(tt)
     tt.save(filepath)
     print(f"[STAT TABLE] Added STAT table to {filepath}")
 
