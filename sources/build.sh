@@ -1,7 +1,7 @@
 # # source venv/bin/activate
 # set -e
 
-mkdir -p ../fonts ../fonts/ttf ../fonts/ttf/static ../fonts/otf ../fonts/web_fonts ../fonts/web_fonts/static
+mkdir -p ../fonts ../fonts/ttf ../fonts/variable ../fonts/otf ../fonts/web_fonts ../fonts/web_fonts/static
 
 
 # # VF ===================================================================
@@ -16,10 +16,10 @@ function postprocess_vf {
 
 
 # echo "GENERATING VFs"
-VF_FILE=../fonts/ttf/SofiaSans\[wdth,wght]\.ttf
+VF_FILE=../fonts/variable/SofiaSans\[wdth,wght]\.ttf
 fontmake -g SofiaSans-VF-New.glyphs -o variable --family-name "Sofia Sans" --output-path $VF_FILE
 
-VF_FILEit=../fonts/ttf/SofiaSans-Italic\[wdth,wght]\.ttf
+VF_FILEit=../fonts/variable/SofiaSans-Italic\[wdth,wght]\.ttf
 fontmake -g SofiaSans_Italic_VF-New.glyphs -o variable --family-name "Sofia Sans" --output-path $VF_FILEit
 
 
@@ -28,62 +28,62 @@ echo "POST PROCESSING VFs"
 postprocess_vf $VF_FILE
 postprocess_vf $VF_FILEit
 python sofia_stat_table.py $VF_FILE
-rm ../fonts/ttf/*gasp.ttf
+rm ../fonts/variable/*gasp.ttf
 
 
 # # TTF ===================================================================
 
 
-# echo "GENERATING TTFs"
-# fontmake -g SofiaSans-VF-New.glyphs -i -o ttf --output-dir ../fonts/ttf/static
-# fontmake -g SofiaSans_Italic_VF-New.glyphs -i -o ttf --output-dir ../fonts/ttf/static
+echo "GENERATING TTFs"
+fontmake -g SofiaSans-VF-New.glyphs -i -o ttf --output-dir ../fonts/ttf/static
+fontmake -g SofiaSans_Italic_VF-New.glyphs -i -o ttf --output-dir ../fonts/ttf/static
 
-# echo "POST PROCESSING TTFs"
-# ttfs=$(ls ../fonts/ttf/static/*.ttf)
-# for ttf in $ttfs
-# do
-# 	ttfautohint $ttf "$ttf.fix";
-# 	mv "$ttf.fix" $ttf;
+echo "POST PROCESSING TTFs"
+ttfs=$(ls ../fonts/ttf/static/*.ttf)
+for ttf in $ttfs
+do
+	ttfautohint $ttf "$ttf.fix";
+	mv "$ttf.fix" $ttf;
 	
-# 	gftools fix-dsig -f $ttf;
+	gftools fix-dsig -f $ttf;
     
-# 	gftools fix-hinting $ttf;
-#     mv "$ttf.fix" $ttf;
+	gftools fix-hinting $ttf;
+    mv "$ttf.fix" $ttf;
 
-# 	gftools fix-weightclass $ttf;
-# 	# mv "$ttf.fix" $ttf;
-# 	[ -f $ttf.fix ] && mv $ttf.fix $ttf;
+	gftools fix-weightclass $ttf;
+	# mv "$ttf.fix" $ttf;
+	[ -f $ttf.fix ] && mv $ttf.fix $ttf;
 
-# 	fonttools ttLib.woff2 compress $ttf
+	fonttools ttLib.woff2 compress $ttf
     
-# done
+done
 
 
 # # # OTF ===================================================================
 
 
-# echo "GENERATING OTFs"
-# fontmake -g SofiaSans-VF-New.glyphs -i -o otf --output-dir ../fonts/otf/
-# fontmake -g SofiaSans_Italic_VF-New.glyphs -i -o otf --output-dir ../fonts/otf/
+echo "GENERATING OTFs"
+fontmake -g SofiaSans-VF-New.glyphs -i -o otf --output-dir ../fonts/otf/
+fontmake -g SofiaSans_Italic_VF-New.glyphs -i -o otf --output-dir ../fonts/otf/
 
-# echo "POST PROCESSING OTFs"
-# otfs=$(ls ../fonts/otf/*.otf)
-# for otf in $otfs
-# do
-#     psautohint $otf;
-# 	gftools fix-dsig -f $otf;
-#     gftools fix-weightclass $otf;
-# 	[ -f $otf.fix ] && mv $otf.fix $otf;
-# done
+echo "POST PROCESSING OTFs"
+otfs=$(ls ../fonts/otf/*.otf)
+for otf in $otfs
+do
+    psautohint $otf;
+	gftools fix-dsig -f $otf;
+    gftools fix-weightclass $otf;
+	[ -f $otf.fix ] && mv $otf.fix $otf;
+done
 
 
 rm -rf master_ufo/ instance_ufo/
 
 
-# WOFF2 ===================================================================
+WOFF2 ===================================================================
 
-# echo "WOFF2 for static and vf"
+echo "WOFF2 for static and vf"
 
-# rm -rf ../fonts/web_fonts/*.woff2 ../fonts/web_fonts/static/*.woff2
-# mv ../fonts/ttf/static/*.woff2 ../fonts/web_fonts/static
-# mv ../fonts/ttf/*.woff2 ../fonts/web_fonts/
+rm -rf ../fonts/web_fonts/*.woff2 ../fonts/web_fonts/static/*.woff2
+mv ../fonts/ttf/static/*.woff2 ../fonts/web_fonts/static
+mv ../fonts/variable/*.woff2 ../fonts/web_fonts/
