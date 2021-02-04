@@ -95,7 +95,7 @@ ITALIC_AXES = [
     ),
 ]
 
-VARIABLE_DIR = "../fonts/ttf"
+VARIABLE_DIR = "../fonts/variable"
 SOF_UPRIGHT = f"{VARIABLE_DIR}/SofiaSans[wdth,wght].ttf"
 SOF_ITALIC = f"{VARIABLE_DIR}/SofiaSans-Italic[wdth,wght].ttf"
 
